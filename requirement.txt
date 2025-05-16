@@ -1,0 +1,4 @@
+weaviate-client
+sentence-transformers
+groq
+python-dotenv

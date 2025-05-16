@@ -1,0 +1,5 @@
+.venv/
+.env/
+.env.*  # e.g. .env.dev, .env.production
+.env
+.env/local
