@@ -27,7 +27,7 @@ collection = client.collections.get("ChatMessage")
 response = collection.query.hybrid(
     query=query,
     vector=query_vector,
-    limit=5,
+    limit=10,
     alpha=0.5,
 )
 
