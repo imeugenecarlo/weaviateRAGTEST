@@ -4,6 +4,8 @@ from weaviate.classes.init import Auth
 from groq import Groq  # Assuming you're using groq SDK or an API wrapper
 import os
 from dotenv import load_dotenv
+from transformers import AutoTokenizer, AutoModel
+import torch
 
 load_dotenv()
 
@@ -19,20 +21,38 @@ client = weaviate.connect_to_weaviate_cloud(
     auth_credentials=Auth.api_key(weaviate_api_key),
 )
 
+# Load the Snowflake embedding model
+tokenizer = AutoTokenizer.from_pretrained("Snowflake/snowflake-arctic-embed-l-v2.0")
+model = AutoModel.from_pretrained("Snowflake/snowflake-arctic-embed-l-v2.0")
+
+# Function to generate embeddings
+def generate_embedding(text):
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+    # Use the mean pooling of the last hidden state as the embedding
+    embeddings = outputs.last_hidden_state.mean(dim=1).squeeze().tolist()
+    return embeddings
+
+# Generate query vector using the correct model
+query = "Hvornår har casa bailar åbent?"
+query_vector = generate_embedding(query)
+
 # Hybrid Search
-query = "What are the capitals of countries in Europe?"
-query_vector = embedding_model.encode(query).tolist()
-collection = client.collections.get("ChatMessage")
+collection = client.collections.get("FAQv4")
 
 response = collection.query.hybrid(
     query=query,
     vector=query_vector,
     limit=10,
-    alpha=0.5,
+    alpha=0.3,
 )
 
 # Prepare context
-retrieved_texts = [obj.properties["text"] for obj in response.objects]
+retrieved_texts = [
+    f"Category: {obj.properties['combined']}"
+    for obj in response.objects
+]
 context = "\n".join(retrieved_texts)
 
 # Compose prompt
@@ -44,6 +64,7 @@ Context:
 
 Question:
 {query}
+please answer the question in danish.
 """
 
 # Call Groq (you can also call it via requests.post if not using SDK)
