@@ -35,7 +35,7 @@ def generate_embedding(text):
     return embeddings
 
 # Generate query vector using the correct model
-query = "Hvornår har casa bailar åbent?"
+query = "Hvad er Casa bailar danse studio?"
 query_vector = generate_embedding(query)
 
 # Hybrid Search
@@ -65,6 +65,7 @@ Context:
 Question:
 {query}
 please answer the question in danish.
+You are a helpful assistant. for Casa bailar dance studio. Give the adress, phone number, and opening hours.
 """
 
 # Call Groq (you can also call it via requests.post if not using SDK)
