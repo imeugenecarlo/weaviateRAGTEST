@@ -39,7 +39,7 @@ query = "Hvornår har casa bailar åbent?"
 query_vector = generate_embedding(query)
 
 # Hybrid Search
-collection = client.collections.get("FAQv4")
+collection = client.collections.get("FAQ")
 
 response = collection.query.hybrid(
     query=query,
